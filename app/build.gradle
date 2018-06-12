@@ -1,0 +1,54 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
+
+    defaultConfig {
+        applicationId "org.traccar.client"
+        buildConfigField "boolean", "HIDDEN_APP", "false"
+        minSdkVersion 15
+        targetSdkVersion 27
+        versionCode 47
+        versionName '5.10'
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+    }
+
+    flavorDimensions "default"
+    productFlavors {
+        regular
+        google
+        hidden {
+            applicationId "org.traccar.client.hidden"
+            buildConfigField "boolean", "HIDDEN_APP", "true"
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.mapzen.android:lost:3.0.4'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.robolectric:robolectric:3.6.1'
+    googleImplementation 'com.google.firebase:firebase-core:15.0.0'
+    googleImplementation 'com.crashlytics.sdk.android:crashlytics:2.9.1'
+}
+
+if (getGradle().getStartParameter().getTaskRequests().toString().contains("Google")) {
+    apply plugin: 'com.google.gms.google-services'
+    apply plugin: 'io.fabric'
+
+    task copyJson(type: Copy) {
+        from '../../traccar-shared/google-services'
+        into '.'
+        include 'traccar-client-android.json'
+        rename('traccar-client-android.json', 'google-services.json')
+    }
+
+    afterEvaluate {
+        preBuild.dependsOn copyJson
+    }
+}
